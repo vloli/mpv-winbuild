@@ -41,7 +41,7 @@ void mp_event_drop_files(struct input_ctx *ictx, int num_files, char **files,
 
         // 1. 设置指令名称和消息名
         cmd[0] = "script-message";
-        cmd[1] = "mpv_internal_drop_files_forward";
+        cmd[1] = "mpv_internal_drop_files_forward1";
 
         // 2. 填充文件路径
         for (int i = 0; i < num_files; i++) {
@@ -140,4 +140,5 @@ int mp_event_get_mime_type_score(struct input_ctx *ictx, const char *mime_type)
     if (strcmp(mime_type, "text") == 0)
         return 0;
     return -1;
+
 }
