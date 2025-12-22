@@ -200,6 +200,18 @@ jobs:
           repository: shinchiro/mpv-winbuild-cmake
           path: mpv-winbuild-cmake
           fetch-depth: 0
+
+      - name: Redirect mpv source to my fork
+        run: |
+          # 使用 @ 作为定界符，避免 URL 里的斜杠导致 sed 报错
+          # 修改仓库地址
+          sed -i 's@https://github.com/mpv-player/mpv.git@https://github.com/vloli/mpv.git@g' mpv-winbuild-cmake/packages/mpv.cmake
+          
+          # 如果你的分支不是 master，请取消下面这行的注释并修改
+          # sed -i 's/GIT_TAG master/GIT_TAG 你的分支名/g' mpv-winbuild-cmake/packages/mpv.cmake
+          
+          echo "Successfully redirected mpv source to my fork"
+
       - name: Prepare
         run: |
           echo "sha=${{ needs.params.outputs.sha }}" >> $GITHUB_ENV
