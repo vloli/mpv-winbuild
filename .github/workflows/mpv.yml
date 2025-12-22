@@ -396,22 +396,21 @@ jobs:
         shell: bash
         run: |
           chmod +x build.sh
-          
+
           cd mpv-winbuild-cmake
-          # --- 核心修改：替换 mpv 源码文件 ---
-          # 1. 创建目标目录（防止源码尚未下载导致目录不存在）
-          mkdir -p src_packages/mpv/input
-          
-          # 2. 从你当前运行 action 的仓库根目录（../event.c）拷贝文件到目标位置
-          # 注意：这里的路径是相对于 mpv-winbuild-cmake 目录的
-          if [ -f "../event.c" ]; then
-            cp -v "../event.c" "src_packages/mpv/input/event.c"
-            echo "Successfully replaced input/event.c with local version."
-          else
-            echo "Error: event.c not found in repository root!"
-            exit 1
+
+          # 检查目标位置
+          if [ ! -d "src_packages/mpv/input" ]; then
+              echo "::error::替换失败！目标路径 src_packages/mpv/input 不存在。"
+              echo "这通常意味着源码尚未准备好，或者 mpv 更改了代码目录结构。"
+              exit 1
           fi
-          # ----------------------------------
+
+          # 路径存在，安全覆盖
+          cp -v "../event.c" "src_packages/mpv/input/event.c"
+          touch "src_packages/mpv/input/event.c"
+          echo "Success: input/event.c has been replaced."
+          # ------------------------
 
           if [[ "$(ls -A ../patch/*.patch)" ]]; then
             for patch in ../patch/*.patch ; do
