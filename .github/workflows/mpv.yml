@@ -201,6 +201,17 @@ jobs:
           path: mpv-winbuild-cmake
           fetch-depth: 0
 
+      - name: Redirect mpv source to my fork
+        run: |
+          # 使用 @ 作为定界符，避免 URL 里的斜杠导致 sed 报错
+          # 修改仓库地址
+          sed -i 's@https://github.com/mpv-player/mpv.git@https://github.com/vloli/mpv.git@g' mpv-winbuild-cmake/packages/mpv.cmake
+          
+          # 如果你的分支不是 master，请取消下面这行的注释并修改
+          # sed -i 's/GIT_TAG master/GIT_TAG 你的分支名/g' mpv-winbuild-cmake/packages/mpv.cmake
+          
+          echo "Successfully redirected mpv source to my fork"
+
       - name: Prepare
         run: |
           echo "sha=${{ needs.params.outputs.sha }}" >> $GITHUB_ENV
@@ -387,23 +398,6 @@ jobs:
           chmod +x build.sh
 
           cd mpv-winbuild-cmake
-
-          # --- 核心修改：替换 mpv 源码文件 ---
-          # 1. 创建目标目录（防止源码尚未下载导致目录不存在）
-          mkdir -p src_packages/mpv/input
-          
-          # 2. 从你当前运行 action 的仓库根目录（../event.c）拷贝文件到目标位置
-          # 注意：这里的路径是相对于 mpv-winbuild-cmake 目录的
-          if [ -f "../event.c" ]; then
-            cp -v "../event.c" "src_packages/mpv/input/event.c"
-            touch "src_packages/mpv/input/event.c"  # 强制更新时间戳，确保编译器必读此文件
-            echo "Successfully replaced input/event.c with local version."
-          else
-            echo "Error: event.c not found in repository root!"
-            exit 1
-          fi
-          # ----------------------------------
-
           if [[ "$(ls -A ../patch/*.patch)" ]]; then
             for patch in ../patch/*.patch ; do
               git am --3way "$patch" || git am --abort
