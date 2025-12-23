@@ -1,0 +1,42 @@
+name: Check My MPV Fork Update
+
+on:
+  schedule:
+    - cron: '30 2 * * *' # 建议比同步脚本晚半小时，确保同步已完成
+  workflow_dispatch:
+
+permissions:
+  actions: write
+  contents: read
+
+jobs:
+  check-and-trigger:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get My Fork's latest SHA
+        id: get_sha
+        run: |
+          # 获取你自己 Fork 仓库 master 分支最新的 SHA
+          # 请将 vloli/mpv 替换为你真实的仓库名
+          SHA=$(curl -s https://api.github.com/repos/vloli/mpv/commits/master | jq -r .sha)
+          echo "latest_sha=$SHA" >> $GITHUB_OUTPUT
+          echo "My Fork's latest SHA is $SHA"
+
+      - name: Get last built SHA
+        id: last_sha
+        run: |
+          # 获取你上一次编译成功时记录在 version 分支的 SHA
+          LAST_RECORD=$(curl -s https://api.github.com/repos/${{ github.repository }}/branches/version | jq -r .commit.commit.message || echo "none")
+          echo "last_record=$LAST_RECORD" >> $GITHUB_OUTPUT
+
+      - name: Trigger Build
+        # 如果当前 Fork 的 SHA 不在上次编译的记录里，则触发
+        if: contains(steps.last_sha.outputs.last_record, steps.get_sha.outputs.latest_sha) == false
+        run: |
+          gh workflow run mpv.yml \
+            -f build_target=64bit \
+            -f compiler=clang \
+            -f release=false \
+            -f run_name="Auto-Build: Fork Updated (${{ steps.get_sha.outputs.latest_sha }})"
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
