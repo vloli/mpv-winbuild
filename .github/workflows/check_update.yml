@@ -37,7 +37,7 @@ jobs:
         if: contains(steps.last_sha.outputs.last_record, steps.get_sha.outputs.latest_sha) == false
         run: |
           gh workflow run mpv.yml \
-            -f build_target=64bit \
+            -f build_target=64bit-v3 \
             -f compiler=clang \
             -f release=false \
             -f run_name="Auto-Build: Fork Updated (${{ steps.get_sha.outputs.latest_sha }})"
