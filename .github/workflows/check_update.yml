@@ -29,6 +29,9 @@ jobs:
           LAST_RECORD=$(curl -s https://api.github.com/repos/${{ github.repository }}/branches/version | jq -r .commit.commit.message || echo "none")
           echo "last_record=$LAST_RECORD" >> $GITHUB_OUTPUT
 
+      - name: Checkout  # 添加这一步，让 gh 知道你在哪个仓库
+        uses: actions/checkout@v4
+        
       - name: Trigger Build
         # 如果当前 Fork 的 SHA 不在上次编译的记录里，则触发
         if: contains(steps.last_sha.outputs.last_record, steps.get_sha.outputs.latest_sha) == false
