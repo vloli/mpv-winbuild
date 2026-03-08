@@ -199,6 +199,11 @@ jobs:
           repository: shinchiro/mpv-winbuild-cmake
           path: mpv-winbuild-cmake
           fetch-depth: 0
+      - name: Redirect mpv source to my fork
+        run: |
+          # 修改仓库地址
+          sed -i 's@https://github.com/mpv-player/mpv.git@https://github.com/vloli/mpv.git@g' mpv-winbuild-cmake/packages/mpv.cmake
+          echo "Successfully redirected mpv source to my fork"
       - name: Prepare
         run: |
           echo "sha=${{ needs.params.outputs.sha }}" >> $GITHUB_ENV
